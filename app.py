@@ -6,19 +6,26 @@ import gdown
 import os
 
 # -------------------------------
+# Page config (optional but good)
+# -------------------------------
+st.set_page_config(page_title="Sugarcane Disease Detection")
+
+# -------------------------------
 # Download model from Google Drive
 # -------------------------------
 MODEL_PATH = "best_vit_cnn.pth"
 
-if not os.path.exists(MODEL_PATH):
-    url = "https://drive.google.com/uc?id=1pwUoLixTrTrees-VvRwevocXZlMKX6BG"
-    gdown.download(url, MODEL_PATH, quiet=False)
+@st.cache_resource
+def load_model():
+    if not os.path.exists(MODEL_PATH):
+        url = "https://drive.google.com/uc?id=1pwUoLixTrTrees-VvRwevocXZlMKX6BG"
+        gdown.download(url, MODEL_PATH, quiet=False)
 
-# -------------------------------
-# Load model
-# -------------------------------
-model = torch.load(MODEL_PATH, map_location="cpu")
-model.eval()
+    model = torch.load(MODEL_PATH, map_location="cpu")
+    model.eval()
+    return model
+
+model = load_model()
 
 # -------------------------------
 # Image transform
@@ -41,10 +48,10 @@ if file:
     img = Image.open(file).convert("RGB")
     st.image(img, caption="Uploaded Image")
 
-    img = transform(img).unsqueeze(0)
+    img_tensor = transform(img).unsqueeze(0)
 
     with torch.no_grad():
-        output = model(img)
+        output = model(img_tensor)
         pred = torch.argmax(output, dim=1).item()
 
     st.success(f"Prediction: {classes[pred]}")
