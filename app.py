@@ -21,8 +21,8 @@ def load_model():
         url = "https://drive.google.com/uc?id=1pwUoLixTrTrees-VvRwevocXZlMKX6BG"
         gdown.download(url, MODEL_PATH, quiet=False)
 
-    model = torch.load(MODEL_PATH, map_location="cpu")
-    model.eval()
+   model = torch.load(MODEL_PATH, map_location="cpu", weights_only=False)
+model.eval()
     return model
 
 model = load_model()
